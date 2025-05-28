@@ -4,7 +4,7 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from subnet_calc.helpers import valid_address, valid_ipv4
+from subnet_calc.helpers import valid_address, valid_cidr
 
 # @pytest.mark.parametrize(
 #     "octet,expected",
@@ -20,18 +20,18 @@ from subnet_calc.helpers import valid_address, valid_ipv4
 #     assert valid_ipv4(octet) is expected
 
 
-# @pytest.mark.parametrize(
-#     "ip,expected",
-#     [
-#         ("192.168.1.1",    True),
-#         ("10.0.0.0",       True),
-#         ("300.1.1.1",      False),
-#         ("192.168.1",      False),
-#         ("192.168.1.1.1",  False),
-#     ],
-# )
-# def test_valid_ip_part(ip, expected):
-#     assert valid_ip_part(ip) is expected
+@pytest.mark.parametrize(
+    "ip,expected",
+    [
+        ("192.168.1.1",    True),
+        ("10.0.0.0",       True),
+        ("300.1.1.1",      False),
+        ("192.168.1",      False),
+        ("192.168.1.1.1",  False),
+    ],
+)
+def test_valid_address(ip, expected):
+    assert valid_address(ip) is expected
 
 
 @pytest.mark.parametrize(
@@ -47,6 +47,6 @@ from subnet_calc.helpers import valid_address, valid_ipv4
 )
 
 
-def test_valid_ipv4(cidr, expected):
-    assert valid_ipv4(cidr) is expected
+def run_tests(cidr, expected):
+    assert valid_cidr(cidr) is expected
 
