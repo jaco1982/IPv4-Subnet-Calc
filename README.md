@@ -9,8 +9,22 @@ This is currently still very much a work in progress, so check back regularly or
 ## Features
 
 Intended features:
-- Validates IPv4 addresses and CIDR notation
-- Calculates subnet masks, network address, broadcast address, host ranges
+- ✅ Validates IPv4 addresses and CIDR notation
+- ✅ Calculates subnet masks, network address, broadcast address, host ranges
 - CLI-based interaction
 - Designed for readability and learning
+
+## TODO
+- Move binary calculator to helpers
+- Calculate host count
+- Move wildcard calculator to helpers
+- Add wrapper function to perform all calculations in one step
+
+## IPv6
+
+Please note that this module does not currently support IPv4, but this will be added in a future version
+
+## Example Output
+
+The intent is for this to use a wrapper function to output all values as a single JSON dictionary. See examples/output.json for an example.
 
