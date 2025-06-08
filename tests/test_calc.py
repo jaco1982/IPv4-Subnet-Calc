@@ -4,7 +4,7 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from subnet_calc.calculate import ipv4_bin,ipv4_mask_bin, ipv4_net_id, ipv4_broadcast, ipv4_wildcard, ipv4_edge
+from subnet_calc.calculate import ipv4_bin,ipv4_bin, ipv4_net_id, ipv4_broadcast, ipv4_wildcard, ipv4_edge
 
 @pytest.mark.parametrize(
     'mask,bin_mask',
@@ -37,10 +37,10 @@ from subnet_calc.calculate import ipv4_bin,ipv4_mask_bin, ipv4_net_id, ipv4_broa
 )
 def test_calc_mask_bin(mask: str, bin_mask: str):
     if isinstance(bin_mask, str):
-        assert ipv4_mask_bin(mask) == bin_mask
+        assert ipv4_bin(mask) == bin_mask
     else:
         with bin_mask:
-            ipv4_mask_bin(mask)
+            ipv4_bin(mask)
 
 @pytest.mark.parametrize(
     'ip_addr,expected',

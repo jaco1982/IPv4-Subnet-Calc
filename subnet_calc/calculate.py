@@ -48,7 +48,7 @@ def calc_ipv4_mask(address: str):
     netmask = '.'.join(full_mask)
     return netmask
 
-def ipv4_mask_bin(mask: str):
+def ipv4_bin(mask: str):
     """
     Calculate the binary equivalent of the provided netmask
 
