@@ -10,7 +10,6 @@ def valid_address(address: str):
     :type address: str
     returns: Returns True/False whether this is a valid octet
     """
-    # TODO: Add exception catching
 
     octets = address.split('.')
 
@@ -48,9 +47,8 @@ def valid_cidr(address: str):
             cidr_address = cidr_split[0]
             cidr_mask = cidr_split[1]
 
-        # If this list length is indeed correct we can proceed to the next step, which is to check if the mask is numeric
-        # If the mask is numeric we can check if the mask is in the valid range of 1-32 (For now we will not be handling fringe cases as indicated below)
-        # TODO: Add support for /0
+            # If this list length is indeed correct we can proceed to the next step, which is to check if the mask is numeric
+            # If the mask is numeric we can check if the mask is in the valid range of 0-32
             if cidr_mask.isnumeric():
                 if 0 <= int(cidr_mask) <=32:
                     # Now we can check that the address portion is valid. use the return from valid_address, since if it passes everything at this point it is a valid address
