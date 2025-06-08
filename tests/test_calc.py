@@ -4,7 +4,7 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from subnet_calc.calculate import ipv4_bin,ipv4_mask_bin, ipv4_net_id
+from subnet_calc.calculate import ipv4_bin,ipv4_mask_bin, ipv4_net_id, ipv4_broadcast, ipv4_wildcard, ipv4_edge
 
 @pytest.mark.parametrize(
     'mask,bin_mask',
@@ -118,3 +118,104 @@ def test_ipv4_network_id(cidr: str, expected: str):
     else:
         with expected:
             ipv4_net_id(cidr)
+
+@pytest.mark.parametrize(
+    'cidr,expected',
+    [
+        # Valid inputs
+        ('192.168.0.10/24',     '192.168.0.255'),
+        ('10.0.0.5/8',          '10.255.255.255'),
+        ('172.16.5.4/16',       '172.16.255.255'),
+        ('192.168.1.100/30',    '192.168.1.103'),
+        ('192.168.1.100/32',    '192.168.1.100'),
+        ('192.0.2.1/31',        '192.0.2.1'),
+        ('203.0.113.75/26',     '203.0.113.127'),
+        ('198.51.100.200/27',   '198.51.100.223'),
+        ('100.64.0.1/10',       '100.127.255.255'),
+
+        # Invalid inputs (expect ValueError)
+        ('192.168.1.256/24',        pytest.raises(ValueError)),  # Octet out of range
+        ('10.0.0.1/33',             pytest.raises(ValueError)),  # Invalid prefix
+        ('172.16.5/16',             pytest.raises(ValueError)),  # Too few octets
+        ('172.16.5.4.1/16',         pytest.raises(ValueError)),  # Too many octets
+        ('192.168.1.-1/24',         pytest.raises(ValueError)),  # Negative octet
+        ('192.168.1.abc/24',        pytest.raises(ValueError)),  # Non-numeric
+        ('192.168.1.0/banana',      pytest.raises(ValueError)),  # Invalid prefix string
+        ('192.168.1.0/',            pytest.raises(ValueError)),  # Missing prefix
+        ('/24',                     pytest.raises(ValueError)),  # Missing IP
+        ('192.168.1.0',             pytest.raises(ValueError)),  # No CIDR
+    ]
+)
+def test_calc_broadcast(cidr, expected):
+    if isinstance(expected, str):
+        assert ipv4_broadcast(cidr) == expected
+    else:
+        with expected:
+            ipv4_broadcast(cidr)
+
+@pytest.mark.parametrize(
+    'netmask,expected',
+    [
+        # Valid CIDR and their wildcard masks
+        ('192.168.1.0/24',        '0.0.0.255'),
+        ('10.0.0.0/8',            '0.255.255.255'),
+        ('172.16.0.0/16',         '0.0.255.255'),
+        ('192.168.1.0/25',        '0.0.0.127'),
+        ('192.168.1.0/30',        '0.0.0.3'),
+        ('0.0.0.0/0',             '255.255.255.255'),
+        ('255.255.255.255/32',    '0.0.0.0'),
+        ('128.0.0.0/1',           '127.255.255.255'),
+        ('254.0.0.0/7',           '1.255.255.255'),
+
+        # Invalid inputs (should raise ValueError)
+        ('192.168.1.256/24',        pytest.raises(ValueError)),  # Octet out of range
+        ('10.0.0.0/33',             pytest.raises(ValueError)),  # Invalid prefix
+        ('172.16.5/16',             pytest.raises(ValueError)),  # Too few octets
+        ('172.16.5.4.1/16',         pytest.raises(ValueError)),  # Too many octets
+        ('192.168.1.-1/24',         pytest.raises(ValueError)),  # Negative octet
+        ('192.168.1.abc/24',        pytest.raises(ValueError)),  # Non-numeric octet
+        ('192.168.1.0/banana',      pytest.raises(ValueError)),  # Invalid prefix string
+        ('192.168.1.0/',            pytest.raises(ValueError)),  # Missing prefix
+        ('/24',                     pytest.raises(ValueError)),  # Missing IP
+        ('192.168.1.0',             pytest.raises(ValueError)),  # No CIDR
+    ]
+)
+def test_calc_wildcard(netmask, expected):
+    if isinstance(expected, str):
+        assert ipv4_wildcard(netmask) == expected
+    else:
+        with expected:
+            ipv4_wildcard(netmask)
+
+@pytest.mark.parametrize(
+    'cidr,first,expected',
+    [
+        # Valid ranges
+        ('192.168.1.0/24',   True,  '192.168.1.1'),   # First usable
+        ('192.168.1.0/24',   False, '192.168.1.254'), # Last usable
+        ('10.0.0.0/8',       True,  '10.0.0.1'),
+        ('10.0.0.0/8',       False, '10.255.255.254'),
+        ('172.16.0.0/12',    True,  '172.16.0.1'),
+        ('172.16.0.0/12',    False, '172.31.255.254'),
+        ('192.0.2.128/25',   True,  '192.0.2.129'),
+        ('192.0.2.128/25',   False, '192.0.2.254'),
+
+        # Edge cases expected to raise ValueError
+        ('0.0.0.0/0',        True,  pytest.raises(ValueError)),  # Entire IPv4 space, no usable hosts
+        ('192.168.1.0/31',   True,  pytest.raises(ValueError)),  # Point-to-point, no usable host range
+        ('192.168.1.0/32',   True,  pytest.raises(ValueError)),  # Single host
+        ('192.168.1.1/32',   False, pytest.raises(ValueError)),
+    ]
+)
+def test_ipv4_edge(cidr, first, expected):
+    if isinstance(expected, type(pytest.raises(ValueError))):
+        with expected:
+            ipv4_edge(cidr, first)
+    else:
+        assert ipv4_edge(cidr, first) == expected
+
+
+
+
+
+

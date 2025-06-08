@@ -132,16 +132,108 @@ def ipv4_net_id(address: str):
 
     return '.'.join(net_id)
 
-# def calc_broadcast(address: str):
+def ipv4_broadcast(address: str):
+    """
+    Calculate the proper broadcast address from the provided address such that it complies with the relevant IPv4 spec as per RFC 791, 950 and 4632.
 
+    :param address: The IP Address to use as a basis for the calculation in CIDR format. 
+    :type address: str
+    :returns: Returns a string containing the calculated broadcast address
+    """
+
+    broadcast_address = []
+
+    # Let's first validate that the provided address is valid
+    if not validation.valid_cidr(address):
+        raise ValueError(f'Invalid CIDR Address: {address}')
     
-# def calc_start(address: str):
+    # First we need to split the input string to get the address portion
+    cidr_split = address.split('/')
+    #cidr_mask = int(cidr_split[1])
+    address_split = cidr_split[0].split('.')
+
+    # Now we need to get the calculated netmask
+    netmask = calc_ipv4_mask(address)
+    netmask_split = netmask.split('.')
+
+    # Calculate the network ID
+    network_id = ipv4_net_id(address)
+    network_id_split = network_id.split('.')
+
+    # Do a bitwise OR on each octet, using the network ID and the inverse of the netmask
+    for i in range(4):
+        octet = int(network_id_split[i]) | (~int(netmask_split[i]) &  0xFF)
+        broadcast_address.append(str(octet))
+
+    # Convert the result back to a valid IP Address
+
+    return '.'.join(broadcast_address)
+
+def ipv4_wildcard(address: str):
+    """
+    Calculate the subnet wildcard from the provided address such that it complies with the relevant IPv4 spec as per RFC 791, 950 and 4632.
+
+    :param address: The IP Address to use as a basis for the calculation in CIDR format. 
+    :type address: str
+    :returns: Returns a string containing the calculated wildcard
+    """
+    wildcard = []
+
+    # Let's first validate that the provided address is valid
+    if not validation.valid_cidr(address):
+        raise ValueError(f'Invalid CIDR Address: {address}')
+
+    # Now get the mask
+    netmask_split = calc_ipv4_mask(address).split('.')
+
+    # And now simply calculate the bitwise inverse
+    for i in range(4):
+        wildcard.append(str(~int(netmask_split[i]) &  0xFF))
+
+    return '.'.join(wildcard)
+    
+def ipv4_edge(address: str, first: bool):
+    """
+    Calculate the first or last usable address from the provided address such that it complies with the relevant IPv4 spec as per RFC 791, 950 and 4632.
+
+    :param address: The IP Address to use as a basis for the calculation in CIDR format. 
+    :param first: Calculate the first or last address. True == first, False == last
+    :type address: str
+    :type first: bool
+    :returns: Returns a string containing the calculated address
+    """
+
+    return_address = []
+
+    # Let's first validate that the provided address is valid
+    if not validation.valid_cidr(address):
+        raise ValueError(f'Invalid CIDR Address: {address}')
+    
+    # TODO: Handle the edge cases for things like /0, /31 and /32 for now we will just reject it as invalid
+    cidr_split = address.split('/')
+    match int(cidr_split[1]):
+        case 0:
+            raise ValueError('Cannot currently handle /0')
+        case 31:
+            raise ValueError('Cannot currently handle /31')
+        case 32:
+            raise ValueError('Cannot currently handle /32')
+
+    # Calculate the first address or last address
+    match first:
+        case True:
+            # Calculate the network ID
+            # Add 1 to the network ID to get the first address
+            network_id = ipv4_net_id(address).split('.')
+            network_id[3] = str(int(network_id[3]) + 1)
+            return_address = network_id
+        case False:
+            # Calculate the broadcast address
+            # Subtract 1 from the broadcast address to get the last address
+            broadcast = ipv4_broadcast(address).split('.')
+            broadcast[3] = str(int(broadcast[3]) - 1)
+            return_address = broadcast
+    
+    return '.'.join(return_address)
 
 
-# def calc_end(address: str):
-
-
-# def calc_min(address: str):
-
-
-# def calc_max(address: str):
