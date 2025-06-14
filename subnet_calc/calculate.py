@@ -1,8 +1,8 @@
-from subnet_calc import validation
+from . import validation
 
-cidr_mask = ''
-cidr_address = ''
-netmask = ''
+_cidr_mask = ''
+_cidr_address = ''
+_netmask = ''
 
 def calc_ipv4_mask(address: str):
     """
@@ -18,83 +18,59 @@ def calc_ipv4_mask(address: str):
         raise ValueError(f'Invalid CIDR Address: {address}')
 
     cidr_split = address.split('/')
-    cidr_mask = int(cidr_split[1])
-    full_mask = []
+    _cidr_mask = int(cidr_split[1])
+    _full_mask: list[str] = []
 
-    if cidr_mask == 0: # Handle a /0 mask quickly as the value is explicitly known
-        full_mask = ['0','0','0','0']
-    elif cidr_mask == 32: # Handle a /32 mask quickly as the value is explicitly known
-        full_mask = ['255','255','255','255']
+    if _cidr_mask == 0: # Handle a /0 mask quickly as the value is explicitly known
+        _full_mask = ['0','0','0','0']
+    elif _cidr_mask == 32: # Handle a /32 mask quickly as the value is explicitly known
+        _full_mask = ['255','255','255','255']
     else:
         # In order to calculate the mask we need to do some modulo maths to calculate the number of full octets and the number of borrowed bits
     
-        full_octets = cidr_mask // 8 
-        borrowed_bits = cidr_mask % 8
+        _full_octets = _cidr_mask // 8 
+        _borrowed_bits = _cidr_mask % 8
         
         # Now we can calculate the full mask
         
-        if full_octets == 0: # First we set the first octet if the prefix is < 8
-            full_mask.append(str(255 - ((1 << (8-borrowed_bits)) - 1)))
+        if _full_octets == 0: # First we set the first octet if the prefix is < 8
+            _full_mask.append(str(255 - ((1 << (8-_borrowed_bits)) - 1)))
         else:
-            for i in range(full_octets): # Let's deal with the full octets
-                full_mask.append('255')
-            if borrowed_bits != 0:
-                borrowed_octet = str(255 - ((1 << (8-borrowed_bits)) - 1))
-                full_mask.append(borrowed_octet)
+            for i in range(_full_octets): # Let's deal with the full octets
+                _full_mask.append('255')
+            if _borrowed_bits != 0:
+                borrowed_octet = str(255 - ((1 << (8-_borrowed_bits)) - 1))
+                _full_mask.append(borrowed_octet)
 
-        while(len(full_mask) <= 3):
-            full_mask.append('0')
+        while(len(_full_mask) <= 3):
+            _full_mask.append('0')
         
-    netmask = '.'.join(full_mask)
-    return netmask
+    _netmask = '.'.join(_full_mask)
+    return _netmask
 
-def ipv4_bin(mask: str):
-    """
-    Calculate the binary equivalent of the provided netmask
+# def ipv4_bin(address: str):
+#     """
+#     Calculate the binary representation of the provided address
 
-    :param: mask: The netmask to calculate in dot decimal format
-    :type mask: str
-    : returns: Returns a string containing the calculated binary netmask
-    """
+#     :param address: The address to calculate in dot decimal format
+#     :type address: str
+#     :returns: Returns a string containing the binary representation of the provided addesss
+#     """
 
-    binary_mask = []
+#     binary_address = []
+
+#     # First check that the provided address is valid. If not, raise an exception
+#     print(f'Checking {address} is valid')
+#     if not validation.valid_address(address):
+#         raise ValueError(f'Invalid address: {address}')
     
-    # First, check if the provided mask is valid. If not, throw an exception
-    if not validation.valid_mask(mask):
-        raise ValueError(f'Invalid mask: {mask}')
+#    # Now we can split the address into octets, convert each octet into binary and return the entire thing in dot binary format
+#     split_address = address.split('.')
+#     for octet in split_address:
+#         octet = octet.replace(' ','')
+#         binary_address.append(format(int(octet), f'0{8}b'))
 
-    # Split the provided mask into a list and then run the binary calculation on each octet
-    split_mask = mask.split('.')
-
-    # Finally we can take the list and return it as a string in dot binary format
-    for octet in split_mask:
-        binary_mask.append(format(int(octet), f'0{8}b'))
-    
-    return '.'.join(binary_mask)
-
-def ipv4_bin(address: str):
-    """
-    Calculate the binary representation of the provided address
-
-    :param address: The address to calculate in dot decimal format
-    :type address: str
-    :returns: Returns a string containing the binary representation of the provided addesss
-    """
-
-    binary_address = []
-
-    # First check that the provided address is valid. If not, raise an exception
-    print(f'Checking {address} is valid')
-    if not validation.valid_address(address):
-        raise ValueError(f'Invalid address: {address}')
-    
-   # Now we can split the address into octets, convert each octet into binary and return the entire thing in dot binary format
-    split_address = address.split('.')
-    for octet in split_address:
-        octet = octet.replace(' ','')
-        binary_address.append(format(int(octet), f'0{8}b'))
-
-    return '.'.join(binary_address)
+#     return '.'.join(binary_address)
 
 def ipv4_net_id(address: str):
     """
@@ -104,33 +80,33 @@ def ipv4_net_id(address: str):
     :type address: str
     :returns: Returns a string containing the calcualted network ID
     """
-    net_id = []
+    _net_id: list[str] = []
 
     # Let's first validate that the provided address is valid
     if not validation.valid_cidr(address):
         raise ValueError(f'Invalid CIDR Address: {address}')
 
     # First we need to split the input string to get the address portion
-    cidr_split = address.split('/')
-    #cidr_mask = int(cidr_split[1])
-    address_split = cidr_split[0].split('.')
+    _cidr_split = address.split('/')
+    #_cidr_mask = int(cidr_split[1])
+    _address_split = _cidr_split[0].split('.')
 
     # Let's handle the fringe cases /0 and /32, as these are quick and easy and requires no calculations
-    if cidr_split[1] == 32:
-        return cidr_split[0]
-    elif cidr_split[1] == 0:
+    if int(_cidr_split[1]) == 32:
+        return _cidr_split[0]
+    elif int(_cidr_split[1]) == 0:
         return '0.0.0.0'
 
-    # Now we need to get the calculated netmask
-    netmask = calc_ipv4_mask(address)
-    netmask_split = netmask.split('.')
+    # Now we need to get the calculated _netmask
+    _netmask = calc_ipv4_mask(address)
+    _netmask_split = _netmask.split('.')
 
     # Now we can calculate the network ID, where all the host bits are 0
     # Take the provided address, and calculated mask and do a bitwise AND to get the resulting address. This should be the network ID
     for i in range(4):
-        net_id.append(str(int(netmask_split[i]) & int(address_split[i])))
+        _net_id.append(str(int(_netmask_split[i]) & int(_address_split[i])))
 
-    return '.'.join(net_id)
+    return '.'.join(_net_id)
 
 def ipv4_broadcast(address: str):
     """
@@ -141,56 +117,33 @@ def ipv4_broadcast(address: str):
     :returns: Returns a string containing the calculated broadcast address
     """
 
-    broadcast_address = []
+    _broadcast_address: list[str] = []
 
     # Let's first validate that the provided address is valid
     if not validation.valid_cidr(address):
         raise ValueError(f'Invalid CIDR Address: {address}')
     
     # First we need to split the input string to get the address portion
-    cidr_split = address.split('/')
-    #cidr_mask = int(cidr_split[1])
-    address_split = cidr_split[0].split('.')
+    _cidr_split = address.split('/')
+    #_cidr_mask = int(cidr_split[1])
+    _address_split = _cidr_split[0].split('.')
 
-    # Now we need to get the calculated netmask
-    netmask = calc_ipv4_mask(address)
-    netmask_split = netmask.split('.')
+    # Now we need to get the calculated _netmask
+    _netmask = calc_ipv4_mask(address)
+    _netmask_split = _netmask.split('.')
 
     # Calculate the network ID
-    network_id = ipv4_net_id(address)
-    network_id_split = network_id.split('.')
+    _network_id = ipv4_net_id(address)
+    _network_id_split = _network_id.split('.')
 
-    # Do a bitwise OR on each octet, using the network ID and the inverse of the netmask
+    # Do a bitwise OR on each octet, using the network ID and the inverse of the _netmask
     for i in range(4):
-        octet = int(network_id_split[i]) | (~int(netmask_split[i]) &  0xFF)
-        broadcast_address.append(str(octet))
+        octet = int(_network_id_split[i]) | (~int(_netmask_split[i]) &  0xFF)
+        _broadcast_address.append(str(octet))
 
     # Convert the result back to a valid IP Address
 
-    return '.'.join(broadcast_address)
-
-def ipv4_wildcard(address: str):
-    """
-    Calculate the subnet wildcard from the provided address such that it complies with the relevant IPv4 spec as per RFC 791, 950 and 4632.
-
-    :param address: The IP Address to use as a basis for the calculation in CIDR format. 
-    :type address: str
-    :returns: Returns a string containing the calculated wildcard
-    """
-    wildcard = []
-
-    # Let's first validate that the provided address is valid
-    if not validation.valid_cidr(address):
-        raise ValueError(f'Invalid CIDR Address: {address}')
-
-    # Now get the mask
-    netmask_split = calc_ipv4_mask(address).split('.')
-
-    # And now simply calculate the bitwise inverse
-    for i in range(4):
-        wildcard.append(str(~int(netmask_split[i]) &  0xFF))
-
-    return '.'.join(wildcard)
+    return '.'.join(_broadcast_address)
     
 def ipv4_edge(address: str, first: bool):
     """
