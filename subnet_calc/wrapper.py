@@ -10,8 +10,8 @@ _subnet_values = {
                         'mask'          :   ''
                     },
     'output'    :   {
-                        'result'        :   False,
-                        'message'       :   ''
+                        'result'        :   False,          # Default result
+                        'message'       :   'Invalid input' # Default return message
                     },
     'network'   :   {
                         'network_id'    :   '',
@@ -84,4 +84,4 @@ def calc_subnet(address:str):
                 'message': f'Exception: {str(e)}'
             }
 
-    return json.dumps(_subnet_values, indent = 4)
+    return json.dumps(_subnet_values, indent = 2)

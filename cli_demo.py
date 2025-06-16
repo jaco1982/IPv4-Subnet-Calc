@@ -15,9 +15,12 @@ if address == '': # If no CLI address is specified
 raw_results = calc_subnet(address)
 results = json.loads(raw_results)
 
-for key, value in results.items():
-    print(f'{key}:')
-    for sub_key, sub_value in value.items():
-        print(f'   {sub_key:<12}:  {sub_value}')
-    print()
+if results['output']['result']:
+    for key, value in results.items():
+        print(f'{key}:')
+        for sub_key, sub_value in value.items():
+            print(f'   {sub_key:<12}:  {sub_value}')
+        print()
+else:
+    print('Error calculating results')
 
