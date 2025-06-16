@@ -23,22 +23,22 @@ Intended features:
 ## Installation and use
 Reccomended installing with pipx. Since installing this is outside of the scope of this guide, Google is your friend. Install with the following command:
 
-{
-    pipx install git+https://github.com/jaco1982/IPv4-Subnet-Calc
-    pipx ensurepath
-}
+```
+pipx install git+https://github.com/jaco1982/IPv4-Subnet-Calc
+pipx ensurepath
+```
 
 Then restart your terminal of choice.
 
 After installing you can run this with the following command:
 
-{
-    ipcalc CIDR_Address
-}
+```
+ipcalc CIDR_Address
+```
 
 Output should look similar to this:
 
-{
+```
     input:
         CIDR        :  192.168.0.0/24
         address     :  192.168.0.0
@@ -63,7 +63,7 @@ Output should look similar to this:
         network_id  :  11000000.10101000.00000000.00000000
         netmask     :  11111111.11111111.11111111.00000000
         broadcast   :  11000000.10101000.00000000.11111111
-}
+```
 
 
 ## IPv6
