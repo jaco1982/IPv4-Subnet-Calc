@@ -1,5 +1,6 @@
 LICENSE
 README.md
+ipcalc.py
 setup.py
 subnet_calc/__init__.py
 subnet_calc/calculate.py
